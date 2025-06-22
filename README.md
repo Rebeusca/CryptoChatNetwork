@@ -30,7 +30,7 @@ CryptoChat is a secure chat application that uses TCP socket communication and e
     2. Double-click launcher.exe;
 
     3. Follow the same interface steps as above.
-    
+
 ## Technologies used:
 
 - Python 3.12
@@ -46,12 +46,32 @@ CryptoChat is a secure chat application that uses TCP socket communication and e
 - Practical security validation with Wireshark sniffing
 - One-click launcher to start server and clients
 
-
 ## Security tests:
 
 - Messages captured via Wireshark appear fully encrypted (unreadable);
 - Only the recipient client is able to decrypt the message;
 - The server relays messages without ever accessing their content.
+
+## How to Verify Encryption with Wireshark
+
+To confirm that end-to-end encryption (E2EE) is working correctly and that the server cannot read the message contents, follow these steps using Wireshark:
+
+- Start Wireshark:
+    - Open Wireshark before starting the chat;
+    - Select the correct network interface:
+        - If testing locally, choose Npcap Loopback Adapter (Windows) or lo0 (macOS/Linux).
+
+- Apply a capture filter
+    ```bash
+    tcp.port==5000
+
+- Start the server and clients
+    - Connect two clients and send some test messages between them.
+
+- Inspect the captured packets
+    - Look for packets containing data and session_key;
+    - Expand the TCP stream and you'll see the encrypted payload;
+    - ✅ If the payload looks like random characters (base64 or binary) and does not        contain phrases like "Hello" or "Oi", encryption is confirmed.
 
 ## Autors
 
