@@ -6,7 +6,6 @@ __pycache__/
 # PyInstaller (ignore build artifacts)
 *.spec
 build/
-dist/*
 !dist/launcher/
 !dist/launcher/launcher.exe
 dist/launcher/_internal/
