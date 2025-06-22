@@ -4,8 +4,11 @@ import subprocess
 import os
 import sys
 
-SERVER_PATH = os.path.abspath(os.path.join("source_code", "server.py"))
-CLIENT_PATH = os.path.abspath(os.path.join("source_code", "client.py"))
+PYTHON_EXEC = "python" if sys.platform == "win32" else "python3"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_PATH = os.path.abspath(os.path.join(BASE_DIR, "source_code", "server.py"))
+CLIENT_PATH = os.path.abspath(os.path.join(BASE_DIR, "source_code", "client.py"))
 
 processes = {"server": None, "clients": [None, None]}
 
@@ -14,7 +17,7 @@ def start_server():
         messagebox.showinfo("Warning", "Server was already started.")
         return
     try:
-        processes["server"] = subprocess.Popen([sys.executable, SERVER_PATH])
+        processes["server"] = subprocess.Popen([PYTHON_EXEC, SERVER_PATH])
         messagebox.showinfo("Server", "Server started successfully.")
     except Exception as e:
         messagebox.showerror("Error", f"Error starting server:\n{e}")
@@ -24,7 +27,7 @@ def open_client():
         messagebox.showinfo("Warning", "Maximum of 2 clients are already open.")
         return
     try:
-        proc = subprocess.Popen([sys.executable, CLIENT_PATH])
+        proc = subprocess.Popen([PYTHON_EXEC, CLIENT_PATH])
         for i in range(len(processes["clients"])):
             if processes["clients"][i] is None:
                 processes["clients"][i] = proc
