@@ -25,7 +25,7 @@ CryptoChat is a secure chat application that uses TCP socket communication and e
 
 **Option 2: using executable (.exe files)**
 
-    1. Go to the dist/ folder;
+    1. Go to the cryptochat/ folder;
 
     2. Double-click launcher.exe;
 
