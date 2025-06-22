@@ -59,7 +59,8 @@ To confirm that end-to-end encryption (E2EE) is working correctly and that the s
 - Start Wireshark:
     - Open Wireshark before starting the chat;
     - Select the correct network interface:
-        - If testing locally, choose Npcap Loopback Adapter (Windows) or lo0 (macOS/Linux).
+        - If testing locally, choose Npcap Loopback Adapter (Windows) or lo0 (macOS/Linux);
+        - If using two devices, use the real network interface (e.g., Wi-Fi).
 
 - Apply a capture filter
     ```bash
@@ -71,7 +72,7 @@ To confirm that end-to-end encryption (E2EE) is working correctly and that the s
 - Inspect the captured packets
     - Look for packets containing data and session_key;
     - Expand the TCP stream and you'll see the encrypted payload;
-    - ✅ If the payload looks like random characters (base64 or binary) and does not        contain phrases like "Hello" or "Oi", encryption is confirmed.
+    - ✅ If the payload looks like random characters (base64 or binary) and does not contain phrases like "Hello" or "Oi", encryption is confirmed.
 
 ## Autors
 
