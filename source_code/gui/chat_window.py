@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import scrolledtext, messagebox
 from tkinter import ttk
 import datetime
+import os
 
 class ChatWindow:
     def __init__(self, nickname, on_send, on_close):
@@ -10,6 +11,14 @@ class ChatWindow:
         self.window.geometry("600x600")
         self.window.minsize(600, 600)
         self.nickname = nickname
+        
+        # Adicionando ícone à janela
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cryptochatIcon.ico")
+        if os.path.exists(icon_path):
+            try:
+                self.window.iconbitmap(icon_path)
+            except TclError:
+                print(f"Não foi possível carregar o ícone: {icon_path}")
         
         # Configurando cores
         self.bg_color = "#f0f0f0"
