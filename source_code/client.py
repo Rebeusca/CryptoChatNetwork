@@ -4,12 +4,12 @@ import json
 import base64
 from tkinter import simpledialog, messagebox, Tk
 
-from colors.colors import Colors
+from styles.colors import Colors
 from utils_crypto import (
-    generate_key_pair, 
-    serialize_public_key, 
-    deserialize_public_key, 
-    encrypt_key, 
+    generate_key_pair,
+    serialize_public_key,
+    deserialize_public_key,
+    encrypt_key,
     decrypt_session_key,
     generate_session_key,
     encrypt_message,
@@ -23,23 +23,20 @@ PORT = 5000
 # Flag global para controlar exibição de mensagens de erro
 show_connection_errors = True
 
-def receive_messages(sock, private_key, session_key, peer_nickname):
+def receive_messages(sock, private_key, peer_nickname):
     global show_connection_errors
     
     while True:
         try:
             data = sock.recv(8192)
             if not data:
-                # The other user has disconnected - don't show error if we're voluntarily exiting
                 if show_connection_errors:
                     print(f"{Colors.YELLOW}[SYSTEM] The other user has left the chat.{Colors.RESET}")
                 break
                 
-            # Tentativa de descriptografar a mensagem
             try:
                 encrypted_data = json.loads(data.decode())
                 
-                # Verifica se é uma mensagem criptografada
                 if 'encrypted_message' in encrypted_data and 'encrypted_key' in encrypted_data:
                     # Primeiro descriptografa a chave de sessão usando nossa chave privada
                     encrypted_session_key = base64.b64decode(encrypted_data['encrypted_key'])
@@ -57,14 +54,11 @@ def receive_messages(sock, private_key, session_key, peer_nickname):
                     print(f"{Colors.YELLOW}[SYSTEM] {encrypted_data.get('message', 'The other user has left the chat.')}{Colors.RESET}")
             
             except Exception as e:
-                # Only show processing errors if we're not voluntarily exiting
                 if show_connection_errors:
-                    # Don't show connection-related errors
                     if "message" not in str(e).lower() and "connection" not in str(e).lower():
-                        pass  # Suppress all processing errors for better user experience
+                        pass
                 
         except Exception as e:
-            # Don't show error if we're voluntarily exiting or if it's a connection error 
             if show_connection_errors and "10053" not in str(e) and "connection" not in str(e).lower():
                 print(f"{Colors.YELLOW}[SYSTEM] Connection lost.{Colors.RESET}")
             break
@@ -81,12 +75,10 @@ def connect_to_server(server_ip, port=5000, nickname=None):
         private_key, public_key = generate_key_pair()
         public_key_pem = serialize_public_key(public_key)
         
-        # Se o nickname não foi fornecido, solicite ao usuário
         if nickname is None:
             nickname = input(f"{Colors.CYAN}Enter your nickname: {Colors.YELLOW}")
             print(Colors.RESET, end="")
         
-        # Enviar informações iniciais para o servidor
         init_data = {
             'nickname': nickname,
             'public_key': public_key_pem.decode()
@@ -95,7 +87,6 @@ def connect_to_server(server_ip, port=5000, nickname=None):
         client.send(json.dumps(init_data).encode())
         print(f"{Colors.GREEN}[*] Connected as {Colors.BOLD}{nickname}{Colors.RESET}.")
         
-        # Aguardar a conexão do outro cliente e receber sua chave pública
         print(f"{Colors.CYAN}[*] Waiting for another user...{Colors.RESET}")
         peer_data = client.recv(4096)
         
@@ -103,23 +94,21 @@ def connect_to_server(server_ip, port=5000, nickname=None):
             peer_info = json.loads(peer_data.decode())
             
             peer_nickname = peer_info['nickname']
-            # Convertemos de string para bytes e depois para objeto de chave
+            # Converte de string para bytes e depois para objeto de chave
             peer_public_key = deserialize_public_key(peer_info['public_key'].encode())
             
             print(f"{Colors.GREEN}[+] {peer_nickname} connected to chat! Type your messages below!{Colors.RESET}")
             
-            # Criamos uma chave de sessão única para esta conversa
+            # Cria uma chave de sessão única para esta conversa
             session_key = generate_session_key()
             return client, nickname, peer_nickname, private_key, public_key, peer_public_key, session_key
             
         except Exception as e:
-            # Tratando caso de resposta do servidor que não é relativa a outro usuário
             if 'system' in str(peer_data.decode()):
                 print(f"{Colors.YELLOW}[SYSTEM] Message from server: {str(peer_data.decode())}{Colors.RESET}")
             else:
                 print(f"{Colors.YELLOW}[SYSTEM] Waiting for another user...{Colors.RESET}")
             
-            # Não levanta exceção, mas retorna None para indicar falha
             client.close()
             return None, None, None, None, None, None, None
         
@@ -150,7 +139,6 @@ def send_encrypted_message(sock, message, peer_public_key, session_key):
         return True
             
     except Exception as e:
-        # Avoid showing technical errors to the user
         if show_connection_errors:
             print(f"{Colors.YELLOW}[SYSTEM] Could not send message. The other user may have disconnected.{Colors.RESET}")
         return False
@@ -160,20 +148,20 @@ def main():
     
     # Inicializar o Tkinter corretamente
     root = Tk()
-    root.withdraw()  # Esconde a janela principal temporariamente
+    root.withdraw()
     
     try:
         # Solicita o endereço IP do servidor usando Tkinter dialog
         server_ip = simpledialog.askstring("Cryptochat", "Enter server IP address:", initialvalue="127.0.0.1")
         if not server_ip:
-            root.destroy()  # Fecha a janela Tk se o usuário cancelar
-            return  # Usuário cancelou
+            root.destroy()
+            return
         
         # Solicita o nickname
         nickname = simpledialog.askstring("Cryptochat", "Enter your nickname:")
         if not nickname:
-            root.destroy()  # Fecha a janela Tk se o usuário cancelar
-            return  # Usuário cancelou
+            root.destroy()
+            return
             
         # Tenta conectar ao servidor e configurar a criptografia E2EE
         client, nickname, peer_nickname, private_key, public_key, peer_public_key, session_key = connect_to_server(server_ip, PORT, nickname)
@@ -189,10 +177,8 @@ def main():
         
         # Criando a janela de chat
         def on_send_message(message):
-            # Mostra a mensagem que você está enviando
             chat_window.display(f"[You]: {message}")
             
-            # Envia a mensagem criptografada para o outro cliente
             if not send_encrypted_message(client, message, peer_public_key, session_key):
                 chat_window.display("[SYSTEM] Failed to send message. The other user may have disconnected.")
         
@@ -202,7 +188,6 @@ def main():
             
             if client:
                 try:
-                    # Enviar mensagem de despedida
                     system_message = {
                         'system': True,
                         'message': f"{nickname} leave."
@@ -211,7 +196,6 @@ def main():
                 except:
                     pass
                     
-                # Fecha a conexão silenciosamente
                 try:
                     client.shutdown(socket.SHUT_RDWR)
                 except:
@@ -235,7 +219,6 @@ def main():
                 try:
                     data = client.recv(8192)
                     if not data:
-                        # O outro usuário se desconectou
                         if show_connection_errors:
                             chat_window.display("[SYSTEM] The other user has left the chat.")
                         break
@@ -264,12 +247,10 @@ def main():
                             chat_window.display(f"[SYSTEM] {encrypted_data.get('message', 'The other user has left the chat.')}")
                     
                     except Exception as e:
-                        # Só exibe erro de processamento se não estamos saindo voluntariamente
                         if show_connection_errors:
-                            pass  # Não mostramos erros técnicos na interface
+                            pass
                         
                 except Exception as e:
-                    # Não exibe erro se estivermos saindo voluntariamente
                     if show_connection_errors and "10053" not in str(e) and "connection" not in str(e).lower():
                         chat_window.display("[SYSTEM] Connection lost.")
                     break

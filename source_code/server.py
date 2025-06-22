@@ -4,7 +4,7 @@ import json
 import sys
 import queue
 
-from colors.colors import Colors
+from styles.colors import Colors
 
 # Configurações do servidor
 HOST = '0.0.0.0'
