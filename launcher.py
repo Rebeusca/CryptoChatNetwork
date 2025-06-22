@@ -4,11 +4,14 @@ import subprocess
 import os
 import sys
 
-PYTHON_EXEC = "python" if sys.platform == "win32" else "python3"
+# Detecta corretamente o diretório do executável, mesmo empacotado
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVER_PATH = os.path.abspath(os.path.join(BASE_DIR, "source_code", "server.py"))
-CLIENT_PATH = os.path.abspath(os.path.join(BASE_DIR, "source_code", "client.py"))
+SERVER_PATH = os.path.join(BASE_DIR, "dist", "server.exe")
+CLIENT_PATH = os.path.join(BASE_DIR, "dist", "client.exe")
 
 processes = {"server": None, "clients": [None, None]}
 
@@ -17,7 +20,7 @@ def start_server():
         messagebox.showinfo("Warning", "Server was already started.")
         return
     try:
-        processes["server"] = subprocess.Popen([PYTHON_EXEC, SERVER_PATH])
+        processes["server"] = subprocess.Popen([SERVER_PATH])
         messagebox.showinfo("Server", "Server started successfully.")
     except Exception as e:
         messagebox.showerror("Error", f"Error starting server:\n{e}")
@@ -27,7 +30,7 @@ def open_client():
         messagebox.showinfo("Warning", "Maximum of 2 clients are already open.")
         return
     try:
-        proc = subprocess.Popen([PYTHON_EXEC, CLIENT_PATH])
+        proc = subprocess.Popen([CLIENT_PATH])
         for i in range(len(processes["clients"])):
             if processes["clients"][i] is None:
                 processes["clients"][i] = proc
