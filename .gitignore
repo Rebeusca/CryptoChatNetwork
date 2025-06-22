@@ -1,4 +1,19 @@
-# Python bytecode files
-**/__pycache__/
-# Compiled Python files
+# Python cache
+__pycache__/
 *.pyc
+*.pyo
+
+# PyInstaller (ignore build artifacts)
+*.spec
+build/
+dist/*
+!dist/launcher/
+!dist/launcher/launcher.exe
+dist/launcher/_internal/
+
+# VSCode
+.vscode/
+
+# Arquivos temporários
+*.log
+*.tmp
